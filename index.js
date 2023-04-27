@@ -1,33 +1,27 @@
+require('dotenv').config();
 const express = require('express');
-const auth = require('./routes/auth');
-const forum = require('./routes/forum')
-const user = require('./routes/user');
-const session = require('express-session');
-const cors = require('cors');
-const { urlencoded } = require('express');
+const app = express();
+const cors = require('cors')
+const cookieParser = require('cookie-parser');
+const api = require('./router/api');
+const errorMiddleware = require('./middlewares/error-middleware');
 const path = require('path');
 
-const app = express();
-app.use(cors());
-app.use(session({
-    secret: 'secretidhere',
-    resave: true,
-    saveUninitialized: true,
-    cookie: { httpOnly: true }
-}))
+const PORT = process.env.PORT || 5000;
+
 app.use(express.json());
-app.use(urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(cors({
+    credentials: true,
+    origin: process.env.CLIENT_URL
+}));
+app.use('/api', api);
+app.use(errorMiddleware);
 
-app.use('/auth', auth);
-app.use('/forum', forum);
-app.use('/user', user);
-
-app.get('/photo/:id', (req, res) => {
-    res.sendFile(path.join(__dirname, 'images', req.params.id));
+app.get("/images/:filetype/:filename", (req, res) => {
+    const filename = req.params.filename;
+    const filetype = req.params.filetype;
+    return res.sendFile(path.join(__dirname, "images", filetype, filename));
 });
 
-app.get('/avatar/:id', (req, res) => {
-    res.sendFile(path.join(__dirname, 'avatars', req.params.id));
-});
-
-app.listen(8080);
+app.listen(PORT, () => console.log(PORT))
