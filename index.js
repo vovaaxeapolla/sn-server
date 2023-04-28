@@ -24,4 +24,6 @@ app.get("/images/:filetype/:filename", (req, res) => {
     return res.sendFile(path.join(__dirname, "images", filetype, filename));
 });
 
-app.listen(PORT, () => console.log(PORT))
+app.listen(PORT, () => {
+    console.log(PORT, process.env.CLIENT_URL)
+})
